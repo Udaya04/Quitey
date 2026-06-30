@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
+import { animate, splitText, stagger } from "animejs"
 import {
   GraduationCap,
   Search,
@@ -13,6 +15,7 @@ import {
   PenLine,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react"
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber"
 
@@ -43,6 +46,11 @@ function FloatingBadge({
 
 export default function Home() {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"))
+  }, [])
 
   const journeyFeatures = [
     { icon: FileText,   title: "ATS Resume Checker",    desc: "Upload your resume and get an AI-powered ATS score with detailed improvement tips. Powered by Groq AI.",      badge: "Powered by Groq AI" },
@@ -88,16 +96,33 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [visibleTestimonials])
 
+  useEffect(() => {
+    const split = splitText("#hero-title", { words: true })
+    split.words.forEach(word => {
+      word.style.opacity = "0"
+      word.style.transform = "translateY(40px)"
+      word.style.filter = "blur(8px)"
+    })
+    animate(split.words, {
+      opacity: [0, 1],
+      translateY: [40, 0],
+      filter: ["blur(8px)", "blur(0px)"],
+      duration: 800,
+      delay: stagger(80),
+      ease: "outExpo"
+    })
+  }, [])
+
   const maxTestimonialIndex = testimonials.length - visibleTestimonials
   return (
     <main className="min-h-screen bg-primary overflow-hidden">
       {/* SECTION 1 — NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/80 backdrop-blur-md border-b border-white/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-6 h-6 text-accent" />
-                <span className="text-white font-bold text-lg">CareerOS</span>
+                <span className="text-white font-bold text-xl">CareerOS</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#" className="text-white/70 hover:text-white text-sm transition">
@@ -110,106 +135,132 @@ export default function Home() {
                 Blog
               </a>
             </div>
-            <button className="bg-accent text-primary rounded-full px-4 py-1.5 font-bold text-sm hover:brightness-110 transition">
+            <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="bg-accent text-primary rounded-full px-4 py-1.5 font-bold text-sm hover:brightness-110 transition inline-block">
               Get Started
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
 
       {/* SECTION 2 — HERO */}
-      <section className="min-h-[100vh] pt-16 pb-20 bg-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center border border-accent/30 bg-accent/10 text-accent text-sm rounded-full px-4 py-1.5"
-          >
-            ✦ AI-Powered Career Platform for CSE Students
-          </motion.div>
+      <section className="min-h-[100vh] pt-32 lg:pt-40 pb-20 bg-primary">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-start gap-12">
 
-          <h1 className="text-5xl sm:text-6xl font-bold mt-6 leading-tight">
-            Build & Launch Your
-            <br />
-            Career With
-            <br />
-            <span className="text-white">Career</span>
-            <motion.span
-              className="text-accent inline-block"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              OS
-            </motion.span>
-          </h1>
+            {/* LEFT COLUMN — text content */}
+            <div className="w-full lg:w-1/2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center border border-accent/30 bg-accent/10 text-accent text-sm rounded-full px-4 py-1.5"
+              >
+                ✦ AI-Powered Career Platform for CSE Students
+              </motion.div>
 
-          <p className="text-white/60 text-lg mt-4 max-w-xl mx-auto leading-relaxed">
-            The all-in-one platform for CSE students to build skills, crack
-            interviews, and land their dream internship.
-          </p>
+              <h1 id="hero-title" className="text-5xl lg:text-6xl font-bold mt-6 leading-tight text-left">
+                Build & Launch Your
+                <br />
+                Career With
+                <br />
+                <span className="text-white">Career</span>
+                <motion.span
+                  className="text-accent inline-block"
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  OS
+                </motion.span>
+              </h1>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-accent text-primary rounded-full px-8 py-3 font-bold hover:brightness-110 transition text-base">
-              Start For Free →
-            </button>
-            <button className="border border-white/20 text-white rounded-full px-8 py-3 hover:border-white/40 transition text-base">
-              See How It Works
-            </button>
-          </div>
+              <p className="text-white/60 text-lg mt-4 max-w-lg leading-relaxed text-left">
+                The all-in-one platform for CSE students to build skills, crack
+                interviews, and land their dream internship.
+              </p>
 
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <div className="flex -space-x-2">
-              {["#C8FF00", "#C8FF00", "#C8FF00"].map((c, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full opacity-80 border-2 border-primary"
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
-            <span className="text-white/50 text-sm">
-              Built for CSE students • 100% Free
-            </span>
-          </div>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="bg-accent text-primary rounded-full px-8 py-3 font-bold hover:brightness-110 transition text-base inline-block">
+                  Start For Free →
+                </Link>
+                <a href="#journey" className="border border-white/20 text-white rounded-full px-8 py-3 hover:border-white/40 transition text-base inline-block">
+                  See How It Works
+                </a>
+              </div>
 
-          <div className="mt-12 relative max-w-[900px] mx-auto">
-            <div className="w-full h-[300px] sm:h-[450px] bg-card border-2 border-dashed border-white/20 rounded-2xl flex items-center justify-center">
-              <span className="text-white/40 text-sm text-center px-4">
-                IMAGE: Dashboard screenshot showing ATS score, quiz results,
-                interview feedback — dark themed UI mockup
-              </span>
+              <div className="mt-6 flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  {["#C8FF00", "#C8FF00", "#C8FF00"].map((c, i) => (
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full opacity-80 border-2 border-primary"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+                <span className="text-white/50 text-sm">
+                  Built for CSE students • 100% Free
+                </span>
+              </div>
             </div>
 
-            <FloatingBadge
-              delay={0}
-              className="absolute -top-4 -left-4 bg-accent text-primary rounded-full px-3 py-1.5 text-sm font-bold shadow-lg"
+            {/* RIGHT COLUMN — image with badges */}
+            <motion.div
+              className="w-full lg:w-1/2 relative min-h-[400px] lg:min-h-[500px] flex items-center justify-center lg:self-center"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              whileHover={{ scale: 1.02 }}
             >
-              ✓ ATS Score: 89%
-            </FloatingBadge>
-            <FloatingBadge
-              delay={0.5}
-              className="absolute -top-4 -right-4 bg-white text-primary rounded-full px-3 py-1.5 text-sm shadow-lg"
-            >
-              Quiz: OS 9/10
-            </FloatingBadge>
-            <FloatingBadge
-              delay={1}
-              className="absolute -bottom-4 -left-4 bg-white text-primary rounded-full px-3 py-1.5 text-sm shadow-lg"
-            >
-              Interview: Strong Yes
-            </FloatingBadge>
-            <FloatingBadge
-              delay={1.5}
-              className="absolute -bottom-4 -right-4 bg-accent text-primary rounded-full px-3 py-1.5 text-sm font-bold shadow-lg"
-            >
-              Roadmap: 3 weeks left
-            </FloatingBadge>
+              <img
+                src="/images/students-hero.png"
+                alt="CSE students building their career with CareerOS"
+                className="w-full h-full object-contain max-h-[90%]"
+              />
+
+              <FloatingBadge
+                delay={0}
+                className="absolute top-4 right-4 bg-accent text-primary rounded-full px-3 py-1.5 text-sm font-bold shadow-lg"
+              >
+                ✓ ATS Score: 89%
+              </FloatingBadge>
+              <FloatingBadge
+                delay={0.5}
+                className="absolute top-4 left-4 bg-white text-primary rounded-full px-3 py-1.5 text-sm shadow-lg"
+              >
+                Quiz: OS 9/10
+              </FloatingBadge>
+              <FloatingBadge
+                delay={1}
+                className="absolute bottom-4 right-4 bg-white text-primary rounded-full px-3 py-1.5 text-sm shadow-lg"
+              >
+                Interview: Strong Yes
+              </FloatingBadge>
+              <FloatingBadge
+                delay={1.5}
+                className="absolute bottom-4 left-4 bg-accent text-primary rounded-full px-3 py-1.5 text-sm font-bold shadow-lg"
+              >
+                Roadmap: 3 weeks left
+              </FloatingBadge>
+
+              <motion.div
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2"
+                animate={{ y: [0, 6, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <a
+                  href="#journey"
+                  className="flex items-center justify-center w-10 h-10 bg-accent rounded-full shadow-lg"
+                >
+                  <ChevronDown className="w-5 h-5 text-primary" />
+                </a>
+              </motion.div>
+            </motion.div>
+
           </div>
 
-          <div className="mt-16">
-            <p className="text-white/40 text-xs uppercase tracking-wider">
+          <div className="mt-8">
+            <p className="text-white/40 text-xs uppercase tracking-wider text-center">
               Trusted by students from
             </p>
             <div className="mt-3 flex flex-wrap justify-center gap-3">
@@ -229,7 +280,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 3 — YOUR JOURNEY WITH CAREEROS */}
-      <section className="py-24 bg-white">
+      <section id="journey" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12">
             {/* Left side — sticky preview */}
@@ -466,9 +517,9 @@ export default function Home() {
                   </span>
                 ))}
               </div>
-              <button className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full">
+              <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full block text-center">
                 Apply Now →
-              </button>
+              </Link>
             </div>
 
             {/* Card 2 */}
@@ -493,9 +544,9 @@ export default function Home() {
                   </span>
                 ))}
               </div>
-              <button className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full">
+              <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full block text-center">
                 Apply Now →
-              </button>
+              </Link>
             </div>
 
             {/* Card 3 */}
@@ -520,17 +571,17 @@ export default function Home() {
                   </span>
                 ))}
               </div>
-              <button className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full">
+              <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="mt-4 bg-[#C8FF00] text-[#0D1F0D] rounded-full text-sm font-bold py-2 px-4 w-full block text-center">
                 Apply Now →
-              </button>
+              </Link>
             </div>
           </div>
 
           {/* View All */}
           <div className="mt-8 text-center">
-            <button className="border border-white text-white rounded-full px-8 py-3 font-bold text-sm hover:bg-white/10 transition">
+            <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="border border-white text-white rounded-full px-8 py-3 font-bold text-sm hover:bg-white/10 transition inline-block">
               View All Jobs →
-            </button>
+            </Link>
           </div>
 
           {/* Sidebar promo */}
@@ -539,9 +590,9 @@ export default function Home() {
             <p className="text-primary/70 text-sm mt-2">
               is Just a Click Away!
             </p>
-            <button className="mt-4 bg-primary text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-secondary transition">
+            <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="mt-4 bg-primary text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-secondary transition inline-block">
               Browse Jobs →
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -704,9 +755,9 @@ export default function Home() {
           <p className="text-[#4B5563] mt-4 leading-relaxed">
             Join thousands of CSE students already using CareerOS
           </p>
-          <button className="mt-8 bg-[#0D1F0D] text-white rounded-full px-10 py-4 font-bold text-lg hover:bg-[#1A2B1A] transition">
+          <Link href={isLoggedIn ? "/dashboard" : "/auth/signup"} className="mt-8 bg-[#0D1F0D] text-white rounded-full px-10 py-4 font-bold text-lg hover:bg-[#1A2B1A] transition inline-block">
             Get Started Free →
-          </button>
+          </Link>
           <p className="text-[#6B7280] text-sm mt-4">
             <span className="text-[#0D1F0D] font-bold"><AnimatedNumber value={500} suffix="+" /></span> students •
             <span className="text-[#0D1F0D] font-bold"><AnimatedNumber value={95} suffix="%" /></span> success rate

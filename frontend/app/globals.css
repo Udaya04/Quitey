@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #0D1F0D;
@@ -22,4 +26,14 @@ body {
 .marquee-track {
   display: inline-flex;
   animation: marquee 30s linear infinite;
+}
+
+#hero-title .word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+#hero-title {
+  word-spacing: normal;
+  line-height: 1.1;
 }
